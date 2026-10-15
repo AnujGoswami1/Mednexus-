@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard - MedNexus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">
+            <div class="brand-icon"></div>
+            <span>MedNexus</span>
+        </a>
+        <div class="navbar-links">
+            <a href="/" class="nav-link"> Map</a>
+            <span class="nav-link" id="userGreeting"></span>
+            <button class="nav-link" onclick="logout()">🚪 Logout</button>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>Patient Portal</h3>
+                <p>Your Health Dashboard</p>
+            </div>
+            <ul class="sidebar-nav">
+                <li><button class="active" onclick="showPatientSection('overview')"><span class="nav-icon">📊</span> Overview</button></li>
+                <li><button onclick="showPatientSection('hospitals')"><span class="nav-icon">🏥</span> Find Hospital</button></li>
+                <li><button onclick="showPatientSection('bookings')"><span class="nav-icon">📋</span> My Bookings</button></li>
+                <li><button onclick="showPatientSection('profile')"><span class="nav-icon">👤</span> Profile</button></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <!-- OVERVIEW -->
+            <div id="p-section-overview">
+                <div class="page-header">
+                    <div>
+                        <h1 id="welcomeMessage">Welcome back!</h1>
+                        <p class="subtitle">Your health dashboard at a glance</p>
+                    </div>
+                    <a href="/" class="btn btn-primary">🗺️ Open Map</a>
+                </div>
+
+                <div class="stats-grid" id="patientStats"></div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3>Active Bookings</h3>
+                    </div>
+                    <div id="activeBookingsList" style="padding:20px;"></div>
+                </div>
+            </div>
+
+            <!-- FIND HOSPITAL -->
+            <div id="p-section-hospitals" style="display:none;">
+                <div class="page-header">
+                    <div>
+                        <h1> Find Hospitals</h1>
+                        <p class="subtitle">Search and book beds at nearby hospitals</p>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+                    <select id="pSearchBedType" style="padding:10px;border:2px solid var(--gray-300);border-radius:8px;flex:1;min-width:150px;">
+                        <option value="">All Bed Types</option>
+                        <option value="General">General</option>
+                        <option value="ICU">ICU</option>
+                        <option value="Ventilator">Ventilator</option>
+                        <option value="Oxygen">Oxygen</option>
+                        <option value="Premium">Premium</option>
+                        <option value="Pediatric">Pediatric</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="searchHospitals()">🔍 Search</button>
+                </div>
+
+                <div id="hospitalSearchResults"></div>
+            </div>
+
+            <!-- BOOKINGS -->
+            <div id="p-section-bookings" style="display:none;">
+                <div class="page-header">
+                    <div>
+                        <h1>📋 My Bookings</h1>
+                        <p class="subtitle">Track your hospital bed bookings</p>
+                    </div>
+                </div>
+                <div class="data-card">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Hospital</th>
+                                <th>Bed Type</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientBookingsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PROFILE -->
+            <div id="p-section-profile" style="display:none;">
+                <div class="page-header">
+                    <div>
+                        <h1>👤 My Profile</h1>
+                        <p class="subtitle">Manage your personal information</p>
+                    </div>
+                </div>
+                <div class="data-card">
+                    <div style="padding:24px;">
+                        <form onsubmit="updatePatientProfile(event)">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" id="ppName">
+                                </div>
+                                <div class="form-group">
+                                    <label>Phone</label>
+                                    <input type="tel" id="ppPhone">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Blood Group</label>
+                                    <select id="ppBlood">
+                                        <option value="">Select</option>
+                                        <option>A+</option><option>A-</option>
+                                        <option>B+</option><option>B-</option>
+                                        <option>AB+</option><option>AB-</option>
+                                        <option>O+</option><option>O-</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Emergency Contact</label>
+                                    <input type="tel" id="ppEmergency">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Medical History</label>
+                                <textarea id="ppHistory" rows="4" placeholder="Any known allergies, conditions..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Book Modal -->
+    <div class="modal-overlay" id="bookModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3> Book a Bed</h3>
+                <button class="close-panel" onclick="document.getElementById('bookModal').classList.remove('active')">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="bookHospitalId">
+                <div id="bookHospitalInfo" style="margin-bottom:16px;"></div>
+                <div class="form-group">
+                    <label>Bed Type</label>
+                    <select id="bookBedType">
+                        <option value="General">General</option>
+                        <option value="ICU">ICU</option>
+                        <option value="Ventilator">Ventilator</option>
+                        <option value="Oxygen">Oxygen</option>
+                        <option value="Premium">Premium</option>
+                        <option value="Pediatric">Pediatric</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select id="bookPriority">
+                        <option value="normal">Normal</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="emergency">Emergency</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Reason</label>
+                    <textarea id="bookReason" rows="3" placeholder="Brief description of condition..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="document.getElementById('bookModal').classList.remove('active')">Cancel</button>
+                <button class="btn btn-success" onclick="submitBooking()"> Confirm Booking</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="/js/auth.js"></script>
+    <script src="/js/patient_dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MedLocator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-left">
+            <a href="/" style="color:white;font-size:1.4rem;font-weight:800;margin-bottom:40px;display:inline-flex;align-items:center;gap:8px;">
+                MedNexus
+            </a>
+            <h1>Welcome Back to<br>MedLocator</h1>
+            <p>Access real-time hospital bed availability, AI-powered recommendations, and predictive analytics all in one platform.</p>
+            <div class="auth-features">
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">🗺️</div>
+                    <span>Real-time hospital mapping</span>
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">🤖</div>
+                    <span>AI-powered bed predictions (LSTM & ARIMA)</span>
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">📊</div>
+                    <span>Advanced analytics dashboard</span>
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">🏥</div>
+                    <span>Hospital management system</span>
+                </div>
+            </div>
+        </div>
+        <div class="auth-right">
+            <div class="auth-card">
+                <h2>Sign In</h2>
+                <p class="subtitle">Choose your account type to continue</p>
+
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="switchLoginTab('patient')" id="patientLoginTab">
+                         Patient
+                    </button>
+                    <button class="auth-tab" onclick="switchLoginTab('hospital')" id="hospitalLoginTab">
+                        Hospital
+                    </button>
+                </div>
+
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="loginEmail">Email Address</label>
+                        <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                    </div>
+                    <div id="loginError" class="form-error" style="display:none;margin-bottom:12px;"></div>
+                    <button type="submit" class="btn btn-primary btn-lg auth-submit" id="loginSubmitBtn">
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    Don't have an account? <a href="/register.html">Register here</a>
+                </div>
+
+                <div style="margin-top:16px;padding:16px;background:var(--gray-100);border-radius:8px;font-size:0.8rem;">
+                    <strong>Demo Credentials:</strong><br>
+                    Patient: patient@test.com / patient123<br>
+                    Hospital: admin@aiims.com / hospital123
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="/js/auth.js"></script>
+    <script>
+        let loginRole = 'patient';
+
+        function switchLoginTab(role) {
+            loginRole = role;
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(role + 'LoginTab').classList.add('active');
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('loginSubmitBtn');
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.style.display = 'none';
+            btn.innerHTML = '<span class="spinner" style="width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top:2px solid white;border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;"></span> Signing in...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('loginEmail').value,
+                        password: document.getElementById('loginPassword').value
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('refresh_token', data.refresh_token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('role', data.role);
+                    if (data.hospital) {
+                        localStorage.setItem('hospital', JSON.stringify(data.hospital));
+                    }
+
+                    showToast('Login successful!', 'success');
+                    setTimeout(() => {
+                        if (data.role === 'hospital') {
+                            window.location.href = '/hospital_dashboard.html';
+                        } else {
+                            window.location.href = '/patient_dashboard.html';
+                        }
+                    }, 500);
+                } else {
+                    errorDiv.textContent = data.error || 'Login failed';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Network error. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+
+            btn.innerHTML = 'Sign In';
+            btn.disabled = false;
+        }
+    </script>
+</body>
+</html>

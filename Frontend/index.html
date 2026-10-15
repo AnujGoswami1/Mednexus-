@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedNexus - Maximizing care not Chaos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Custom hospital marker */
+        .hospital-marker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: #ff1744;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(255,23,68,0.4);
+        }
+        .hospital-marker .marker-inner {
+            transform: rotate(45deg);
+            color: white;
+            font-size: 16px;
+            font-weight: 900;
+        }
+        .hospital-marker.available {
+            background: #00c853;
+            box-shadow: 0 3px 10px rgba(0,200,83,0.4);
+        }
+        .hospital-marker.limited {
+            background: #ff9100;
+            box-shadow: 0 3px 10px rgba(255,145,0,0.4);
+        }
+        .hospital-marker.full {
+            background: #ff1744;
+            box-shadow: 0 3px 10px rgba(255,23,68,0.4);
+        }
+        .user-marker {
+            width: 20px;
+            height: 20px;
+            background: #0066ff;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 0 0 2px #0066ff, 0 0 20px rgba(0,102,255,0.4);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 2px #0066ff, 0 0 20px rgba(0,102,255,0.4); }
+            50% { box-shadow: 0 0 0 6px rgba(0,102,255,0.2), 0 0 40px rgba(0,102,255,0.2); }
+            100% { box-shadow: 0 0 0 2px #0066ff, 0 0 20px rgba(0,102,255,0.4); }
+        }
+        .route-info {
+            background: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <a href="/" class="navbar-brand">
+            <div class="brand-icon">🏥</div>
+            <span>MedNexus</span>
+        </a>
+        <div class="navbar-links" id="navLinks">
+            <button class="nav-link active" onclick="showPage('map')"> Map</button>
+            <a href="/login.html" class="nav-link" id="loginBtn"> Login</a>
+            <a href="/register.html" class="btn btn-primary btn-sm" id="registerBtn">Get Started</a>
+            <!-- Logged in state (hidden by default) -->
+            <button class="nav-link" id="dashboardBtn" style="display:none;" onclick="goToDashboard()">Dashboard</button>
+            <button class="nav-link" id="logoutBtn" style="display:none;" onclick="logout()"> Logout</button>
+            <span class="nav-link" id="userGreeting" style="display:none;"></span>
+        </div>
+    </nav>
+
+    <!-- Map Container -->
+    <div class="map-container" id="mapPage">
+        <div id="map"></div>
+
+        <!-- Map Controls -->
+        <div class="map-controls">
+            <div class="control-card">
+                <h3>🔍 Find Hospitals</h3>
+                <div class="filter-group">
+                    <label>Bed Type</label>
+                    <select id="bedTypeFilter">
+                        <option value="">All Types</option>
+                        <option value="General">General</option>
+                        <option value="ICU">ICU</option>
+                        <option value="Ventilator">Ventilator</option>
+                        <option value="Oxygen">Oxygen Supported</option>
+                        <option value="Premium">Premium/Private</option>
+                        <option value="Pediatric">Pediatric</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Priority</label>
+                    <select id="priorityFilter">
+                        <option value="normal">Normal</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="emergency">Emergency</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Max Distance (km)</label>
+                    <input type="range" id="distanceFilter" min="5" max="100" value="50"
+                           oninput="document.getElementById('distanceVal').textContent=this.value+'km'">
+                    <span id="distanceVal" style="font-size:0.85rem;font-weight:600;color:var(--primary);">50km</span>
+                </div>
+                <button class="find-nearest-btn" id="findNearestBtn" onclick="findNearestHospital()">
+                    <span>⚡</span>
+                    <span id="findBtnText">Find Nearest Hospital</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Recommendation Panel -->
+        <div class="recommendation-panel" id="recommendPanel">
+            <div class="panel-header">
+                <h3> Recommended Hospitals</h3>
+                <button class="close-panel" onclick="closeRecommendations()">✕</button>
+            </div>
+            <div class="recommendation-list" id="recommendationList">
+                <!-- Filled dynamically -->
+            </div>
+        </div>
+
+        <!-- Map Stats Bar -->
+        <div class="map-stats" id="mapStats">
+            <div class="stat-item">
+                <div class="stat-value" id="totalHospitals">0</div>
+                <div class="stat-label">Hospitals</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalBeds">0</div>
+                <div class="stat-label">Total Beds</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="availableBeds">0</div>
+                <div class="stat-label">Available</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="avgOccupancy">0%</div>
+                <div class="stat-label">Occupancy</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/js/map.js"></script>
+    <script src="/js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - MedLocator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-left">
+            <a href="/" style="color:white;font-size:1.4rem;font-weight:800;margin-bottom:40px;display:inline-flex;align-items:center;gap:8px;">
+                MedNexus
+            </a>
+            <h1>Join<br>MedNexus</h1>
+            <p>Register as a patient to find hospitals or as a hospital to manage beds and serve patients better.</p>
+            <div class="auth-features">
+                <div class="auth-feature">
+                    <div class="auth-feature-icon"></div>
+                    <span>Patients: Find and book beds instantly</span>
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-icon"></div>
+                    <span>Hospitals: Manage beds & predict demand</span>
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">📈</div>
+                    <span>AI predictions for better planning</span>
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-icon"></div>
+                    <span>100% Free to use</span>
+                </div>
+            </div>
+        </div>
+        <div class="auth-right">
+            <div class="auth-card" style="max-height:90vh;overflow-y:auto;">
+                <h2>Create Account</h2>
+                <p class="subtitle">Choose your account type</p>
+
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="switchRegisterTab('patient')" id="patientRegTab">
+                         Patient
+                    </button>
+                    <button class="auth-tab" onclick="switchRegisterTab('hospital')" id="hospitalRegTab">
+                         Hospital
+                    </button>
+                </div>
+
+                <!-- Patient Registration Form -->
+                <form id="patientRegForm" onsubmit="handlePatientRegister(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="pRegName" placeholder="John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" id="pRegPhone" placeholder="+91-XXXXXXXXXX">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="pRegEmail" placeholder="john@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="pRegPassword" placeholder="Min 6 characters" required minlength="6">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" id="pRegDob">
+                        </div>
+                        <div class="form-group">
+                            <label>Blood Group</label>
+                            <select id="pRegBlood">
+                                <option value="">Select</option>
+                                <option>A+</option><option>A-</option>
+                                <option>B+</option><option>B-</option>
+                                <option>AB+</option><option>AB-</option>
+                                <option>O+</option><option>O-</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Emergency Contact</label>
+                        <input type="tel" id="pRegEmergency" placeholder="+91-XXXXXXXXXX">
+                    </div>
+                    <div id="pRegError" class="form-error" style="display:none;margin-bottom:12px;"></div>
+                    <button type="submit" class="btn btn-primary btn-lg auth-submit">Create Patient Account</button>
+                </form>
+
+                <!-- Hospital Registration Form -->
+                <form id="hospitalRegForm" style="display:none;" onsubmit="handleHospitalRegister(event)">
+                    <div class="form-group">
+                        <label>Admin Name</label>
+                        <input type="text" id="hRegName" placeholder="Dr. Smith" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="hRegEmail" placeholder="admin@hospital.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="hRegPassword" placeholder="Min 6 characters" required minlength="6">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Hospital Name</label>
+                        <input type="text" id="hRegHospitalName" placeholder="City General Hospital" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" id="hRegAddress" placeholder="Full address" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>City</label>
+                            <input type="text" id="hRegCity" placeholder="New Delhi" required>
+                        </div>
+                        <div class="form-group">
+                            <label>State</label>
+                            <input type="text" id="hRegState" placeholder="Delhi" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Pincode</label>
+                            <input type="text" id="hRegPincode" placeholder="110001" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" id="hRegPhone" placeholder="+91-XXXXXXXXXX" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Latitude</label>
+                            <input type="number" step="any" id="hRegLat" placeholder="28.6139" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Longitude</label>
+                            <input type="number" step="any" id="hRegLng" placeholder="77.2090" required>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="autoDetectLocation()" style="margin-bottom:12px;">
+                        📍 Auto-detect Location
+                    </button>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Hospital Type</label>
+                            <select id="hRegType">
+                                <option value="Private">Private</option>
+                                <option value="Government">Government</option>
+                                <option value="NGO">NGO</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Specializations</label>
+                            <input type="text" id="hRegSpec" placeholder="Cardiology,Neurology">
+                        </div>
+                    </div>
+                    <div id="hRegError" class="form-error" style="display:none;margin-bottom:12px;"></div>
+                    <button type="submit" class="btn btn-primary btn-lg auth-submit">Register Hospital</button>
+                </form>
+
+                <div class="auth-footer">
+                    Already have an account? <a href="/login.html">Sign in</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <script src="/js/auth.js"></script>
+    <script>
+        function switchRegisterTab(type) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(type + 'RegTab').classList.add('active');
+            document.getElementById('patientRegForm').style.display = type === 'patient' ? 'block' : 'none';
+            document.getElementById('hospitalRegForm').style.display = type === 'hospital' ? 'block' : 'none';
+        }
+
+        function autoDetectLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    document.getElementById('hRegLat').value = pos.coords.latitude.toFixed(6);
+                    document.getElementById('hRegLng').value = pos.coords.longitude.toFixed(6);
+                    showToast('Location detected!', 'success');
+                }, () => showToast('Could not detect location', 'error'));
+            }
+        }
+
+        async function handlePatientRegister(e) {
+            e.preventDefault();
+            const errorDiv = document.getElementById('pRegError');
+            errorDiv.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/auth/register/patient', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        full_name: document.getElementById('pRegName').value,
+                        email: document.getElementById('pRegEmail').value,
+                        password: document.getElementById('pRegPassword').value,
+                        phone: document.getElementById('pRegPhone').value,
+                        date_of_birth: document.getElementById('pRegDob').value,
+                        blood_group: document.getElementById('pRegBlood').value,
+                        emergency_contact: document.getElementById('pRegEmergency').value
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('role', 'patient');
+                    showToast('Registration successful!', 'success');
+                    setTimeout(() => window.location.href = '/patient_dashboard.html', 500);
+                } else {
+                    errorDiv.textContent = data.error;
+                    errorDiv.style.display = 'block';
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Network error';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        async function handleHospitalRegister(e) {
+            e.preventDefault();
+            const errorDiv = document.getElementById('hRegError');
+            errorDiv.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/auth/register/hospital', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        full_name: document.getElementById('hRegName').value,
+                        email: document.getElementById('hRegEmail').value,
+                        password: document.getElementById('hRegPassword').value,
+                        hospital_name: document.getElementById('hRegHospitalName').value,
+                        address: document.getElementById('hRegAddress').value,
+                        city: document.getElementById('hRegCity').value,
+                        state: document.getElementById('hRegState').value,
+                        pincode: document.getElementById('hRegPincode').value,
+                        phone: document.getElementById('hRegPhone').value,
+                        latitude: document.getElementById('hRegLat').value,
+                        longitude: document.getElementById('hRegLng').value,
+                        hospital_type: document.getElementById('hRegType').value,
+                        specializations: document.getElementById('hRegSpec').value
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('hospital', JSON.stringify(data.hospital));
+                    localStorage.setItem('role', 'hospital');
+                    showToast('Hospital registered!', 'success');
+                    setTimeout(() => window.location.href = '/hospital_dashboard.html', 500);
+                } else {
+                    errorDiv.textContent = data.error;
+                    errorDiv.style.display = 'block';
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Network error';
+                errorDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
